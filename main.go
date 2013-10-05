@@ -42,15 +42,26 @@ func main() {
 		cityPhonetic := removeUnnecessaryString(record[4])
 		langMap[cityName] = cityPhonetic
 
-		if record[8] != "以下に掲載がない場合" {
-			chouikiNames := replace(removeUnnecessaryString(record[8]))
-			//chouikiName := removeUnnecessaryString(record[8])
-			chouikiPhonetic := removeUnnecessaryString(record[5])
-			for i := 0; i < len(chouikiNames); i++ {
-				langMap[chouikiNames[i]] = chouikiPhonetic
-			}
-			//langMap[chouikiName] = chouikiPhonetic
+		if record[8] == "以下に掲載がない場合" {
+			continue
 		}
+
+		chouikiNames := split(removeUnnecessaryString(record[8]))
+		chouikiPhonetics := split(removeUnnecessaryString(record[5]))
+		for i := 0; i < len(chouikiNames); i++ {
+			chouikiNameAliasArray := replace(chouikiNames[i])
+			var chouikiPhonetic string
+			if len(chouikiPhonetics) <= i {
+				chouikiPhonetic = ""
+			} else {
+				chouikiPhonetic = chouikiPhonetics[i]
+			}
+
+			for i := 0; i < len(chouikiNameAliasArray); i++ {
+				langMap[chouikiNameAliasArray[i]] = chouikiPhonetic
+			}
+		}
+
 	}
 
 	for key, value := range langMap {
@@ -60,7 +71,7 @@ func main() {
 }
 
 func removeUnnecessaryString(value string) string {
-	endChars := [...]string{"(", "（", "、"}
+	endChars := [...]string{"(", "（"}
 	endIndex := -1
 	for i := 0; i < len(endChars); i++ {
 		index := strings.Index(value, endChars[i])
@@ -75,6 +86,10 @@ func removeUnnecessaryString(value string) string {
 		return ret
 	}
 	return value
+}
+
+func split(value string) []string {
+	return strings.Split(value, "、")
 }
 
 func replace(value string) [50]string {
